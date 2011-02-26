@@ -1,5 +1,9 @@
 Revision history for perl module Routes::Tiny
 
+0.009010 2011-02-26
+
+ - Forward / is added when building a path
+
 0.009009 2011-02-26
 
  - Initial release
