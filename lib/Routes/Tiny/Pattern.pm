@@ -63,8 +63,6 @@ sub build_path {
     my $self   = shift;
     my %params = @_;
 
-    my $path = q{};
-
     my @parts;
 
     my $optional_depth = 0;
@@ -108,11 +106,7 @@ sub build_path {
         }
     }
 
-    if (length $path) {
-        unshift @parts, $path;
-    }
-
-    return join q{/} => @parts;
+    return q{/} . join q{/} => @parts;
 }
 
 sub _parts {
