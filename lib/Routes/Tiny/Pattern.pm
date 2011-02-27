@@ -60,6 +60,7 @@ sub build_path {
     my @parts;
 
     my $optional_depth = 0;
+    my $trailing_slash = 0;
 
     foreach my $group_part (@{$self->{parts}}) {
         my $path = '';
@@ -101,6 +102,8 @@ sub build_path {
             elsif ($type eq 'text') {
                 $path .= $part->{text};
             }
+
+            $trailing_slash = $part->{trailing_slash};
         }
 
         if ($path ne '') {
@@ -110,7 +113,7 @@ sub build_path {
 
     my $path = q{/} . join q{/} => @parts;
 
-    if ($path ne '/' && $self->{trailing_slash}) {
+    if ($path ne '/' && $trailing_slash) {
         $path .= q{/};
     }
 
@@ -118,7 +121,7 @@ sub build_path {
 }
 
 sub _match_method {
-    my $self  = shift;
+    my $self = shift;
     my ($value) = @_;
 
     my $method = $self->{method};
@@ -130,7 +133,7 @@ sub _match_method {
     my $methods = $method;
     $methods = [$methods] unless ref $methods eq 'ARRAY';
 
-    return !! scalar grep { $_ eq $value } @{$methods};
+    return !!scalar grep { $_ eq $value } @{$methods};
 }
 
 sub _prepare_pattern {
@@ -200,14 +203,21 @@ sub _prepare_pattern {
         elsif ($pattern =~ m{ \G \( }gcxms) {
             $par_depth++;
             $re .= '(?: ';
+            next;
         }
         elsif ($pattern =~ m{ \G \)\? }gcxms) {
             $par_depth--;
             $re .= ' )?';
+            next;
         }
         elsif ($pattern =~ m{ \G \) }gcxms) {
             $par_depth--;
             $re .= ' )';
+            next;
+        }
+
+        if ($part->[-1] && substr($pattern, pos($pattern), 1) eq '/') {
+            $part->[-1]->{trailing_slash} = 1;
         }
     }
 
@@ -217,7 +227,7 @@ sub _prepare_pattern {
 
     $re = qr/^ $re $/xmsi;
 
-    if ($part) {
+    if ($part && @$part) {
         push @parts, $part;
     }
 
