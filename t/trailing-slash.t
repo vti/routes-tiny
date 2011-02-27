@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 10;
 
 use Routes::Tiny;
 
@@ -13,7 +13,10 @@ ok(!$m);
 
 $m = $r->match('/admin/');
 ok($m);
-#is($r->build_path('route'), '/admin/');
+TODO: {
+    local $TODO = "Fix trailing slash";
+    is($r->build_path('route'), '/admin/');
+};
 
 $r = Routes::Tiny->new;
 $r->add_route('/admin/:service(/:action)?', name => 'route');
@@ -35,4 +38,7 @@ ok(!$m);
 
 $m = $r->match('/admin/foo/');
 ok($m);
-#is($r->build_path('route', service => 'foo'), '/admin/foo/');
+TODO: {
+    local $TODO = "Fix trailing slash2";
+    is($r->build_path('route', service => 'foo'), '/admin/foo/');
+}
