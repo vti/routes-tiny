@@ -18,10 +18,10 @@ sub params {
     return $self->{params};
 }
 
-sub pattern {
+sub name {
     my $self = shift;
 
-    return $self->{pattern};
+    return $self->{name};
 }
 
 1;
@@ -35,7 +35,7 @@ Routes::Tiny::Match - Matched object
 
     my $match = $r->match('/foo/bar');
 
-    my $pattern = $match->pattern;
+    my $name = $match->name;
     my $params_hashref = $match->params;
 
 =head1 DESCRIPTION
@@ -44,11 +44,11 @@ L<Routes::Tiny::Match> is a Value Object that holds params of a matched route.
 
 =head1 ATTRIBUTES
 
-=head2 C<pattern>
+=head2 C<name>
 
-    my $pattern = $match->pattern;
+    my $name = $match->name;
 
-Get original route's pattern.
+Get original route's pattern name.
 
 =head2 C<params>
 

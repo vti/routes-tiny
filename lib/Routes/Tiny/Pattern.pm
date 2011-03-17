@@ -48,7 +48,7 @@ sub match {
         }
     }
 
-    return $self->_build_match(pattern => $pattern, params => $params);
+    return $self->_build_match(name => $self->name, params => $params);
 }
 
 sub build_path {
