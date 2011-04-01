@@ -1,6 +1,6 @@
 Revision history for perl module Routes::Tiny
 
-0.009011 2011-03-16
+0.009011 2011-04-01
 
  - Pass 'name' instead of 'pattern' to the match object
 
