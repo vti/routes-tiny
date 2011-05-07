@@ -1,5 +1,9 @@
 Revision history for perl module Routes::Tiny
 
+0.009012 2011-05-07
+
+ - When building a path use default values too
+
 0.009011 2011-04-01
 
  - Pass 'name' instead of 'pattern' to the match object

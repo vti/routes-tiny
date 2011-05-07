@@ -78,9 +78,15 @@ sub build_path {
                     next
                       if $part->{level} && $part->{level} > $optional_depth;
 
-                    Carp::croak(
-                        "Required param '$part->{name}' was not passed when building a path"
-                    );
+                    if (   exists $self->{defaults}
+                        && exists $self->{defaults}->{$name})
+                    {
+                        $params{$name} = $self->{defaults}->{$name};
+                    }
+                    else {
+                        Carp::croak("Required param '$part->{name}' was not "
+                              . "passed when building a path");
+                    }
                 }
 
                 my $param = $params{$name};
