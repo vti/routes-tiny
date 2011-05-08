@@ -11,7 +11,7 @@ $r->add_route('/articles',
     defaults => {controller => 'foo', action => 'bar'});
 $r->add_route('/articles/:id',
     defaults => {controller => 'bar', action => 'foo', id => 1});
-$r->add_route('/:foo/:bar', defaults => {bar => 'foo'}, name => 'foo');
+$r->add_route('/:foo/:bar',      defaults => {bar  => 'foo'}, name => 'foo');
 
 my $m = $r->match('articles');
 is_deeply($m->params, {controller => 'foo', action => 'bar'});

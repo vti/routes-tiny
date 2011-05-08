@@ -99,9 +99,20 @@ sub build_path {
                 $path .= $param;
             }
             elsif ($type eq 'glob') {
-                Carp::croak(
-                    "Required glob param '$name' was not passed when building a path"
-                ) unless exists $params{$name};
+                if (!exists $params{$name}) {
+                    if (   exists $self->{defaults}
+                        && exists $self->{defaults}->{$name})
+                    {
+                        $params{$name} = $self->{defaults}->{$name};
+                    }
+                    elsif ($part->{optional}) {
+                        next;
+                    }
+                    else {
+                        Carp::croak("Required glob param '$part->{name}' was not "
+                              . "passed when building a path");
+                    }
+                }
 
                 $path .= $params{$name};
             }
@@ -212,6 +223,7 @@ sub _prepare_pattern {
             next;
         }
         elsif ($pattern =~ m{ \G \)\? }gcxms) {
+            $part->[-1]->{optional} = 1;
             $par_depth--;
             $re .= ' )?';
             next;
