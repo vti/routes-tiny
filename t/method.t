@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 use Routes::Tiny;
 
@@ -20,3 +20,6 @@ ok(!$r->match('photos/1'));
 ok($r->match('photos/1', method => 'get'));
 ok($r->match('photos/1', method => 'post'));
 ok(!$r->match('photos/1', method => 'head'));
+
+$r->add_route('/logout', method => 'gEt');
+ok($r->match('logout', method => 'geT'));

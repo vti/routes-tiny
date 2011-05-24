@@ -146,9 +146,11 @@ sub _match_method {
     return 1 unless defined $method;
 
     return unless defined $value;
+    $value = uc $value;
 
     my $methods = $method;
     $methods = [$methods] unless ref $methods eq 'ARRAY';
+    $methods = [map {uc} @$methods];
 
     return !!scalar grep { $_ eq $value } @{$methods};
 }
