@@ -13,6 +13,14 @@ sub new {
     my $self = {captures => [], constraints => {}, @_};
     bless $self, $class;
 
+    if (my $methods = $self->{method}) {
+        $methods = [$methods] unless ref $methods eq 'ARRAY';
+        $methods = [map {uc} @$methods];
+        $self->{method} = $methods;
+    }
+
+    $self->_prepare_pattern;
+
     return $self;
 }
 
@@ -24,19 +32,12 @@ sub match {
 
     return unless $self->_match_method($args{method});
 
-    $self->_prepare_pattern;
+    $path = '/' . $path unless substr($path, 0, 1) eq '/';
 
-    unless ($path =~ m{ ^ / }xms) {
-        $path = "/$path";
-    }
-
-    my $pattern = $self->{pattern};
-
-    my @captures = ($path =~ m/ $pattern /xms);
+    my @captures = ($path =~ $self->{pattern});
     return unless @captures;
 
-    my $params = {};
-    $params = {%{$self->{defaults} || {}}};
+    my $params = {%{$self->{defaults} || {}}};
 
     foreach my $capture (@{$self->{captures}}) {
         last unless @captures;
@@ -54,8 +55,6 @@ sub match {
 sub build_path {
     my $self   = shift;
     my %params = @_;
-
-    $self->_prepare_pattern;
 
     my @parts;
 
@@ -141,16 +140,12 @@ sub _match_method {
     my $self = shift;
     my ($value) = @_;
 
-    my $method = $self->{method};
+    my $methods = $self->{method};
 
-    return 1 unless defined $method;
+    return 1 unless defined $methods;
 
     return unless defined $value;
     $value = uc $value;
-
-    my $methods = $method;
-    $methods = [$methods] unless ref $methods eq 'ARRAY';
-    $methods = [map {uc} @$methods];
 
     return !!scalar grep { $_ eq $value } @{$methods};
 }
