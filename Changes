@@ -1,5 +1,9 @@
 Revision history for perl module Routes::Tiny
 
+0.009014 2011-09-02
+
+ - Greatly accelerated routes matching (und3f)
+
 0.009013 2011-07-02
 
  - Made method matching more robust
