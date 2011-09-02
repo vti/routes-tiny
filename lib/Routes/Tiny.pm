@@ -209,6 +209,10 @@ Build path from a given name and params.
 
     http://github.com/vti/routes-tiny
 
+=head1 CREDITS
+
+Sergey Zasenko (und3f)
+
 =head1 AUTHOR
 
 Viacheslav Tykhanovskyi, C<vti@cpan.org>.
