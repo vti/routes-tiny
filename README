@@ -1,154 +1,134 @@
-=pod
+NAME
+    Routes::Tiny - Routes
 
-=head1 NAME
+SYNOPSIS
+        my $routes = Routes::Tiny->new;
 
-Routes::Tiny - Routes
+        # Constraints
+        $routes->add_route('/articles/:id', constraints => {id => qr/\d+/});
 
-=head1 SYNOPSIS
+        # Optional placeholders
+        $routes->add_route('/archive/:year/(:month)?');
 
-    my $routes = Routes::Tiny->new;
+        # Defaults
+        $routes->add_route('/articles/:id',
+            defaults => {controller => 'bar', action => 'foo'});
 
-    # Constraints
-    $routes->add_route('/articles/:id', constraints => {id => qr/\d+/});
+        # Grouping (matches 'hello-bar')
+        $routes->add_route('/(:foo)-bar');
 
-    # Optional placeholders
-    $routes->add_route('/archive/:year/(:month)?');
+        # Globbing (matches 'photos/foo/bar/baz')
+        $routes->add_route('/photos/*other');
 
-    # Defaults
-    $routes->add_route('/articles/:id',
-        defaults => {controller => 'bar', action => 'foo'});
+        # Path building
+        $routes->add_route('/:foo/:bar', name => 'default');
+        $routes->build_path('default', foo => 'hello', bar => 'world');
 
-    # Grouping (matches 'hello-bar')
-    $routes->add_route('/(:foo)-bar');
+        # Matching
+        my $match = $routes->match('/hello/world');
+        my $params_hashref = $match->params;
 
-    # Globbing (matches 'photos/foo/bar/baz')
-    $routes->add_route('/photos/*other');
+        # Matching with method
+        my $match = $routes->match('/hello/world', method => 'GET');
 
-    # Path building
-    $routes->add_route('/:foo/:bar', name => 'default');
-    $routes->build_path('default', foo => 'hello', bar => 'world');
+DESCRIPTION
+    Routes::Tiny is a lightweight routes implementation.
 
-    # Matching
-    my $match = $routes->match('/hello/world');
-    my $params_hashref = $match->params;
+    Routes::Tiny aims to be easy to use in any web framework.
 
-    # Matching with method
-    my $match = $routes->match('/hello/world', method => 'GET');
+FEATURES
+  "Constraints"
+        $routes->add_route('/articles/:id', constraints => {id => qr/\d+/});
 
-=head1 DESCRIPTION
+        $match = $routes->match('/articles/1');  # Routes::Tiny::Match object
+        $match = $routes->match('/article/foo'); # undef
 
-L<Routes::Tiny> is a lightweight routes implementation.
+    It is possible to specify a constraint that a placeholder must match
+    using a normal Perl regular expression.
 
-L<Routes::Tiny> aims to be easy to use in any web framework.
+  "Optional placeholders"
+        $routes->add_route('/admin/:service(/:action)?', defaults => {action => 'list'});
 
-=head1 FEATURES
+        my $match = $routes->match('/admin/foo');
+        # $m->params is {service => 'foo', action => 'list'}
 
-=head2 C<Constraints>
+    It is possible to specify an optional placeholder with a default value.
 
-    $routes->add_route('/articles/:id', constraints => {id => qr/\d+/});
+  "Grouping"
+        $routes->add_route('/(:foo)-bar');
 
-    $match = $routes->match('/articles/1');  # Routes::Tiny::Match object
-    $match = $routes->match('/article/foo'); # undef
+        $match = $routes->match('/hello-bar');
+        # $match->params is {foo => 'hello'}
 
-It is possible to specify a constraint that a placeholder must match using a
-normal Perl regular expression.
+    It is possible to create a placeholder that doesn't occupy all the space
+    between slashes.
 
-=head2 C<Optional placeholders>
+  "Globbing"
+        $routes->add_route('/photos/*other');
+        $routes->add_route('/books/*section/:title');
+        $routes->add_route('/*a/foo/*b');
 
-    $routes->add_route('/admin/:service(/:action)?', defaults => {action => 'list'});
+        $match = $routes->match('photos/foo/bar/baz');
+        # $match->params is {other => 'foo/bar/baz'}
 
-    my $match = $routes->match('/admin/foo');
-    # $m->params is {service => 'foo', action => 'list'}
+        $match = $routes->match('books/some/section/last-words-a-memoir');
+        # $match->params is {section => 'some/section', title => 'last-words-a-memoir'}
 
-It is possible to specify an optional placeholder with a default value.
+        $match = $routes->match('zoo/woo/foo/bar/baz');
+        # $match->params is {a => 'zoo/woo', b => 'bar/baz'}
 
-=head2 C<Grouping>
+    It is possible to specify a globbing placeholder.
 
-    $routes->add_route('/(:foo)-bar');
+  "Path building"
+        $routes->add_route('/articles/:id', name => 'article');
 
-    $match = $routes->match('/hello-bar');
-    # $match->params is {foo => 'hello'}
+        $path = $routes->build_path('article', id => 123);
+        # $path is '/articles/123'
 
-It is possible to create a placeholder that doesn't occupy all the space between
-slashes.
+    It is possible to reconstruct a path from route's name and parameters.
 
-=head2 C<Globbing>
+WARNINGS
+  "Trailing slash issue"
+    Trailing slash is important. Maybe this will be changed in the future.
 
-    $routes->add_route('/photos/*other');
-    $routes->add_route('/books/*section/:title');
-    $routes->add_route('/*a/foo/*b');
+        $routes->add_route('/articles');
 
-    $match = $routes->match('photos/foo/bar/baz');
-    # $match->params is {other => 'foo/bar/baz'}
+        # is different from
 
-    $match = $routes->match('books/some/section/last-words-a-memoir');
-    # $match->params is {section => 'some/section', title => 'last-words-a-memoir'}
+        $routes->add_route('/articles/');
 
-    $match = $routes->match('zoo/woo/foo/bar/baz');
-    # $match->params is {a => 'zoo/woo', b => 'bar/baz'}
+METHODS
+  "new"
+        my $routes = Routes::Tiny->new;
 
-It is possible to specify a globbing placeholder.
+  "add_route"
+        $routes->add_route('/:service/:action');
 
-=head2 C<Path building>
+    Add a new route.
 
-    $routes->add_route('/articles/:id', name => 'article');
+  "match"
+        $routes->match('/hello/world');
 
-    $path = $routes->build_path('article', id => 123);
-    # $path is '/articles/123'
+    Match against a path.
 
-It is possible to reconstruct a path from route's name and parameters.
+  "build_path"
+        $pattern->build_path('name', {foo => 'bar'});
 
-=head1 WARNINGS
+    Build path from a given name and params.
 
-=head2 C<Trailing slash issue>
+DEVELOPMENT
+  Repository
+        http://github.com/vti/routes-tiny
 
-Trailing slash is important. Maybe this will be changed in the future.
+CREDITS
+    Sergey Zasenko (und3f)
 
-    $routes->add_route('/articles');
+AUTHOR
+    Viacheslav Tykhanovskyi, "vti@cpan.org".
 
-    # is different from
+COPYRIGHT AND LICENSE
+    Copyright (C) 2011, Viacheslav Tykhanovskyi
 
-    $routes->add_route('/articles/');
+    This program is free software, you can redistribute it and/or modify it
+    under the terms of the Artistic License version 2.0.
 
-=head1 METHODS
-
-=head2 C<new>
-
-    my $routes = Routes::Tiny->new;
-
-=head2 C<add_route>
-
-    $routes->add_route('/:service/:action');
-
-Add a new route.
-
-=head2 C<match>
-
-    $routes->match('/hello/world');
-
-Match against a path.
-
-=head2 C<build_path>
-
-    $pattern->build_path('name', {foo => 'bar'});
-
-Build path from a given name and params.
-
-=head1 DEVELOPMENT
-
-=head2 Repository
-
-    http://github.com/vti/routes-tiny
-
-=head1 AUTHOR
-
-Viacheslav Tykhanovskyi, C<vti@cpan.org>.
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2011, Viacheslav Tykhanovskyi
-
-This program is free software, you can redistribute it and/or modify it under
-the terms of the Artistic License version 2.0.
-
-=cut
