@@ -48,8 +48,7 @@ sub match {
             $params->{$capture} = $value;
         }
     }
-
-    return $self->_build_match(name => $self->name, params => $params);
+    return $self->_build_match(name => $self->name, params => $params, args => $self->{args} );
 }
 
 sub build_path {
