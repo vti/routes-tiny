@@ -18,6 +18,13 @@ sub params {
     return $self->{params};
 }
 
+sub arguments {
+    my $self = shift;
+
+    return $self->{arguments};
+}
+
+
 sub name {
     my $self = shift;
 
@@ -53,6 +60,12 @@ Get original route's pattern name.
 =head2 C<params>
 
     my $params_hashref = $match->params;
+
+Get params.
+
+=head2 C<arguments>
+
+    my $arguments_hashref = $match->arguments;
 
 Get params.
 
