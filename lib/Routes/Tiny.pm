@@ -6,7 +6,7 @@ use warnings;
 require Carp;
 use Routes::Tiny::Pattern;
 
-our $VERSION = 0.009014;
+our $VERSION = 0.10;
 
 sub new {
     my $class = shift;
@@ -99,7 +99,7 @@ Routes::Tiny - Routes
 
     # Matching
     my $match = $routes->match('/hello/world');
-    my $params_hashref = $match->params;
+    my $captures_hashref = $match->captures;
 
     # Matching with method
     my $match = $routes->match('/hello/world', method => 'GET');
@@ -127,7 +127,7 @@ normal Perl regular expression.
     $routes->add_route('/admin/:service(/:action)?', defaults => {action => 'list'});
 
     my $match = $routes->match('/admin/foo');
-    # $m->params is {service => 'foo', action => 'list'}
+    # $m->captures is {service => 'foo', action => 'list'}
 
 It is possible to specify an optional placeholder with a default value.
 
@@ -136,7 +136,7 @@ It is possible to specify an optional placeholder with a default value.
     $routes->add_route('/(:foo)-bar');
 
     $match = $routes->match('/hello-bar');
-    # $match->params is {foo => 'hello'}
+    # $match->captures is {foo => 'hello'}
 
 It is possible to create a placeholder that doesn't occupy all the space between
 slashes.
@@ -148,15 +148,24 @@ slashes.
     $routes->add_route('/*a/foo/*b');
 
     $match = $routes->match('photos/foo/bar/baz');
-    # $match->params is {other => 'foo/bar/baz'}
+    # $match->captures is {other => 'foo/bar/baz'}
 
     $match = $routes->match('books/some/section/last-words-a-memoir');
-    # $match->params is {section => 'some/section', title => 'last-words-a-memoir'}
+    # $match->captures is {section => 'some/section', title => 'last-words-a-memoir'}
 
     $match = $routes->match('zoo/woo/foo/bar/baz');
-    # $match->params is {a => 'zoo/woo', b => 'bar/baz'}
+    # $match->captures is {a => 'zoo/woo', b => 'bar/baz'}
 
 It is possible to specify a globbing placeholder.
+
+=head2 C<Passing arguments AS IS>
+
+    $routes->add_route('/', arguments => {one => 'two'});
+
+    $match = $routes->match('/');
+    # $match->arguments is {one => 'two'}
+
+It is possible to pass arguments to the match object AS IS.
 
 =head2 C<Path building>
 
@@ -213,13 +222,15 @@ Build path from a given name and params.
 
 Sergey Zasenko (und3f)
 
+Roman Galeev (jamhed)
+
 =head1 AUTHOR
 
 Viacheslav Tykhanovskyi, C<vti@cpan.org>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011, Viacheslav Tykhanovskyi
+Copyright (C) 2011-2012, Viacheslav Tykhanovskyi
 
 This program is free software, you can redistribute it and/or modify it under
 the terms of the Artistic License version 2.0.

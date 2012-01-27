@@ -24,6 +24,8 @@ sub new {
     return $self;
 }
 
+sub arguments { return shift->{arguments} }
+
 sub name { return shift->{name} }
 
 sub match {
@@ -37,19 +39,23 @@ sub match {
     my @captures = ($path =~ $self->{pattern});
     return unless @captures;
 
-    my $params = {%{$self->{defaults} || {}}};
+    my $captures = {%{$self->{defaults} || {}}};
 
     foreach my $capture (@{$self->{captures}}) {
         last unless @captures;
 
         my $value = shift @captures;
 
-        if (defined($value) || !exists $params->{$capture}) {
-            $params->{$capture} = $value;
+        if (defined($value) || !exists $captures->{$capture}) {
+            $captures->{$capture} = $value;
         }
     }
 
-    return $self->_build_match(name => $self->name, params => $params);
+    return $self->_build_match(
+        name      => $self->name,
+        arguments => $self->arguments,
+        captures  => $captures
+    );
 }
 
 sub build_path {
@@ -108,7 +114,8 @@ sub build_path {
                         next;
                     }
                     else {
-                        Carp::croak("Required glob param '$part->{name}' was not "
+                        Carp::croak(
+                                "Required glob param '$part->{name}' was not "
                               . "passed when building a path");
                     }
                 }
@@ -291,6 +298,10 @@ Pass constraints.
 =head2 C<name>
 
 Pass route name.
+
+=head2 C<arguments>
+
+Pass arbitrary arguments.
 
 =head1 METHODS
 

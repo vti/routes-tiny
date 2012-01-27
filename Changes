@@ -1,5 +1,9 @@
 Revision history for perl module Routes::Tiny
 
+0.10 2012-01-27
+
+ - Added arguments (proposed by jemhad)
+
 0.009014 2011-09-02
 
  - Greatly accelerated routes matching (und3f)

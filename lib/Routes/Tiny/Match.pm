@@ -12,10 +12,18 @@ sub new {
     return $self;
 }
 
-sub params {
+sub arguments {
     my $self = shift;
 
-    return $self->{params};
+    return $self->{arguments};
+}
+
+sub params {&captures}
+
+sub captures {
+    my $self = shift;
+
+    return $self->{captures};
 }
 
 sub name {
@@ -50,11 +58,21 @@ L<Routes::Tiny::Match> is a Value Object that holds params of a matched route.
 
 Get original route's pattern name.
 
-=head2 C<params>
+=head2 C<arguments>
 
-    my $params_hashref = $match->params;
+    my $arguments = $match->arguments;
+
+Get route's pattern arguments.
+
+=head2 C<captures>
+
+    my $hashref = $match->captures;
 
 Get params.
+
+=head2 C<params>
+
+An alias to C<captures.
 
 =head1 METHODS
 
