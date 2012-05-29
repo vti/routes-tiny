@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Routes::Tiny::Match;
+use URI::Escape qw(uri_escape);
 
 my $TOKEN = '[^\/()]+';
 
@@ -94,7 +95,7 @@ sub build_path {
                     }
                 }
 
-                my $param = $params{$name};
+                my $param = delete $params{$name};
 
                 if (defined(my $constraint = $part->{constraint})) {
                     Carp::croak("Param '$name' fails a constraint")
@@ -120,7 +121,7 @@ sub build_path {
                     }
                 }
 
-                $path .= $params{$name};
+                $path .= delete $params{$name};
             }
             elsif ($type eq 'text') {
                 $path .= $part->{text};
@@ -138,6 +139,10 @@ sub build_path {
 
     if ($path ne '/' && $trailing_slash) {
         $path .= q{/};
+    }
+
+    if (%params) {
+        $path .= '?'.join('&', map { uri_escape($_).'='.uri_escape($params{$_}) } keys %params);
     }
 
     return $path;
