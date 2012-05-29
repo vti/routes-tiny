@@ -34,6 +34,9 @@ WriteMakefile(
         )
     ),
 
-    PREREQ_PM => {'Carp' => '0'},
+    PREREQ_PM => {
+        'Carp'        => '0',
+        'URI::Escape' => '0'
+    },
     test      => {TESTS  => 't/*.t t/*/*.t t/*/*/*.t t/*/*/*/*.t'}
 );
