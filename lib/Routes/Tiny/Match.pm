@@ -5,9 +5,14 @@ use warnings;
 
 sub new {
     my $class = shift;
+    my (%params) = @_;
 
-    my $self = {params => {}, @_};
+    my $self = {};
     bless $self, $class;
+
+    $self->{name}      = $params{name};
+    $self->{arguments} = $params{arguments};
+    $self->{captures}  = $params{captures};
 
     return $self;
 }
@@ -18,7 +23,7 @@ sub arguments {
     return $self->{arguments};
 }
 
-sub params {&captures}
+sub params { &captures }
 
 sub captures {
     my $self = shift;

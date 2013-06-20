@@ -10,18 +10,29 @@ our $VERSION = 0.1;
 
 sub new {
     my $class = shift;
+    my (%params) = @_;
 
-    my $self = {patterns => []};
+    my $self = {};
     bless $self, $class;
+
+    $self->{strict_trailing_slash} = $params{strict_trailing_slash};
+
+    $self->{patterns}              = [];
+    $self->{strict_trailing_slash} = 1
+      unless defined $self->{strict_trailing_slash};
 
     return $self;
 }
 
 sub add_route {
-    my $self    = shift;
-    my $pattern = shift;
+    my $self = shift;
+    my ($pattern, @args) = @_;
 
-    $pattern = $self->_build_pattern(pattern => $pattern, @_);
+    $pattern = $self->_build_pattern(
+        strict_trailing_slash => $self->{strict_trailing_slash},
+        pattern               => $pattern,
+        @args
+    );
 
     push @{$self->{patterns}}, $pattern;
 
@@ -30,8 +41,7 @@ sub add_route {
 
 sub match {
     my $self = shift;
-    my $path = shift;
-    my @args = @_;
+    my ($path, @args) = @_;
 
     foreach my $pattern (@{$self->{patterns}}) {
         if (my $m = $pattern->match($path, @args)) {
@@ -44,11 +54,11 @@ sub match {
 
 sub build_path {
     my $self = shift;
-    my $name = shift;
+    my ($name, @args) = @_;
 
     my $pattern = $self->_find_route($name);
 
-    return $pattern->build_path(@_) if $pattern;
+    return $pattern->build_path(@args) if $pattern;
 
     Carp::croak("Unknown name '$name' used to build a path");
 }
@@ -180,13 +190,17 @@ It is possible to reconstruct a path from route's name and parameters.
 
 =head2 C<Trailing slash issue>
 
-Trailing slash is important. Maybe this will be changed in the future.
+Trailing slash is important.
 
     $routes->add_route('/articles');
 
     # is different from
 
     $routes->add_route('/articles/');
+
+If you don't want this behaviour pass C<strict_trailing_slash> to the constructor:
+
+    my $routes = Routes::Tiny->new(strict_trailing_slash => 0);
 
 =head1 METHODS
 

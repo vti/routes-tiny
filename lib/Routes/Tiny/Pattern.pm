@@ -9,15 +9,28 @@ my $TOKEN = '[^\/()]+';
 
 sub new {
     my $class = shift;
+    my (%params) = @_;
 
-    my $self = {captures => [], constraints => {}, @_};
+    my $self = {};
     bless $self, $class;
+
+    $self->{name}           = $params{name};
+    $self->{defaults}       = $params{defaults};
+    $self->{arguments}      = $params{arguments};
+    $self->{method}         = $params{method};
+    $self->{pattern}        = $params{pattern};
+    $self->{constraints}    = $params{constraints} || {};
+    $self->{strict_trailing_slash} = $params{strict_trailing_slash};
+
+    $self->{strict_trailing_slash} = 1 unless defined $self->{strict_trailing_slash};
 
     if (my $methods = $self->{method}) {
         $methods = [$methods] unless ref $methods eq 'ARRAY';
         $methods = [map {uc} @$methods];
         $self->{method} = $methods;
     }
+
+    $self->{captures} = [];
 
     $self->_prepare_pattern;
 
@@ -35,6 +48,10 @@ sub match {
     return unless $self->_match_method($args{method});
 
     $path = '/' . $path unless substr($path, 0, 1) eq '/';
+
+    if (!$self->{strict_trailing_slash} && $path ne '/' && $path !~ m{/$}) {
+        $path .= '/';
+    }
 
     my @captures = ($path =~ $self->{pattern});
     return unless @captures;
@@ -60,7 +77,7 @@ sub match {
 
 sub build_path {
     my $self   = shift;
-    my %params = @_;
+    my (%params) = @_;
 
     my @parts;
 
@@ -245,6 +262,18 @@ sub _prepare_pattern {
 
     if ($par_depth != 0) {
         Carp::croak("Parentheses are not balanced in pattern '$pattern'");
+    }
+
+    if (!$self->{strict_trailing_slash}) {
+        if ($re =~ m{/$}) {
+            $re .= '?';
+        }
+        elsif ($re =~ m{\)\?$}) {
+            $re =~ s{\)\?$}{/?)?}
+        }
+        else {
+            $re .= '/?';
+        }
     }
 
     $re = qr/^ $re $/xmsi;
