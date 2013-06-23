@@ -3,6 +3,7 @@ package Routes::Tiny::Pattern;
 use strict;
 use warnings;
 
+require Scalar::Util;
 use Routes::Tiny::Match;
 
 my $TOKEN = '[^\/()]+';
@@ -20,8 +21,11 @@ sub new {
     $self->{method}         = $params{method};
     $self->{pattern}        = $params{pattern};
     $self->{constraints}    = $params{constraints} || {};
+    $self->{routes}         = $params{routes};
+    $self->{subroutes}      = $params{subroutes};
     $self->{strict_trailing_slash} = $params{strict_trailing_slash};
 
+    Scalar::Util::weaken($self->{routes}) if $self->{routes};
     $self->{strict_trailing_slash} = 1 unless defined $self->{strict_trailing_slash};
 
     if (my $methods = $self->{method}) {
@@ -68,11 +72,20 @@ sub match {
         }
     }
 
-    return $self->_build_match(
+    my $match = $self->_build_match(
         name      => $self->name,
         arguments => $self->arguments,
         captures  => $captures
     );
+
+    if ($self->{subroutes}) {
+        my $parent = $match;
+        my $tail = substr($path, length $&);
+        $match = $self->{subroutes}->match($tail); 
+        $match->{parent} = $parent if $match;
+    }
+
+    return $match;
 }
 
 sub build_path {
@@ -151,7 +164,15 @@ sub build_path {
         }
     }
 
-    my $path = q{/} . join q{/} => @parts;
+    my $head = q{/};
+
+    my $parent_pattern = $self->{routes}->{parent_pattern};
+    if ($parent_pattern) {
+        $head = $parent_pattern->build_path(%params);
+        $head .= q{/} unless substr($head, -1) eq q{/};
+    }
+
+    my $path = $head . join q{/} => @parts;
 
     if ($path ne '/' && $trailing_slash) {
         $path .= q{/};
@@ -264,7 +285,7 @@ sub _prepare_pattern {
         Carp::croak("Parentheses are not balanced in pattern '$pattern'");
     }
 
-    if (!$self->{strict_trailing_slash}) {
+    if (!$self->{strict_trailing_slash} && !$self->{subroutes}) {
         if ($re =~ m{/$}) {
             $re .= '?';
         }
@@ -276,7 +297,12 @@ sub _prepare_pattern {
         }
     }
 
-    $re = qr/^ $re $/xmsi;
+    if ($self->{subroutes}) {
+        $re = qr/^ $re /xmsi;
+    }
+    else {
+        $re = qr/^ $re $/xmsi;
+    }
 
     if ($part && @$part) {
         push @parts, $part;

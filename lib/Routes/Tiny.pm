@@ -4,9 +4,10 @@ use strict;
 use warnings;
 
 require Carp;
+require Scalar::Util;
 use Routes::Tiny::Pattern;
 
-our $VERSION = 0.1;
+our $VERSION = 0.11;
 
 sub new {
     my $class = shift;
@@ -17,7 +18,9 @@ sub new {
 
     $self->{strict_trailing_slash} = $params{strict_trailing_slash};
 
+    $self->{parent_pattern}        = undef;
     $self->{patterns}              = [];
+    $self->{names}                 = {};
     $self->{strict_trailing_slash} = 1
       unless defined $self->{strict_trailing_slash};
 
@@ -30,12 +33,26 @@ sub add_route {
 
     $pattern = $self->_build_pattern(
         strict_trailing_slash => $self->{strict_trailing_slash},
+        routes                => $self,
         pattern               => $pattern,
         @args
     );
 
     push @{$self->{patterns}}, $pattern;
 
+    $self->_register_pattern_name($pattern) if $pattern->{name};
+
+    return $pattern;
+}
+
+sub include {
+    my $self = shift;
+    my ($pattern, $routes, @args) = @_;
+
+    $pattern = $self->add_route($pattern, subroutes => $routes, @args);
+    $routes->{parent_pattern} = $pattern;
+    Scalar::Util::weaken($routes->{parent_pattern});
+    $self->_register_pattern_name($_) for values %{ $routes->{names} };
     return $pattern;
 }
 
@@ -56,22 +73,24 @@ sub build_path {
     my $self = shift;
     my ($name, @args) = @_;
 
-    my $pattern = $self->_find_route($name);
+    my $pattern = $self->{names}->{$name};
 
     return $pattern->build_path(@args) if $pattern;
 
     Carp::croak("Unknown name '$name' used to build a path");
 }
 
-sub _find_route {
+sub _register_pattern_name {
     my $self = shift;
-    my ($name) = @_;
+    my ($pattern) = @_;
 
-    foreach my $pattern (@{$self->{patterns}}) {
-        return $pattern if $pattern->name && $pattern->name eq $name;
+    my $name = $pattern->name;
+    if (exists $self->{names}->{ $name }) {
+        Carp::carp("pattern name '$name' already used");
     }
-
-    return;
+    else {
+        $self->{names}->{ $name } = $pattern;
+    }
 }
 
 sub _build_pattern { shift; return Routes::Tiny::Pattern->new(@_) }
@@ -102,6 +121,11 @@ Routes::Tiny - Routes
 
     # Globbing (matches 'photos/foo/bar/baz')
     $routes->add_route('/photos/*other');
+
+    # Subroutes
+    my $subroutes = Routes::Tiny->new;
+    $subroutes->add_route('/article/:id');
+    $routes->include('/admin/', $subroutes);
 
     # Path building
     $routes->add_route('/:foo/:bar', name => 'default');
@@ -167,6 +191,16 @@ slashes.
     # $match->captures is {a => 'zoo/woo', b => 'bar/baz'}
 
 It is possible to specify a globbing placeholder.
+
+=head2 C<Subroutes>
+
+    $subroutes = Routes::Tiny->new;
+    $subroutes->add_route('/related/:page');
+    $routes->include('/article/:id/', $subroutes);
+
+    $match = $routes->match('/article/1/related/3/');
+    # $match->captures is {page => 3}
+    # TODO: continue from here
 
 =head2 C<Passing arguments AS IS>
 

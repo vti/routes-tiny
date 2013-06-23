@@ -13,6 +13,7 @@ sub new {
     $self->{name}      = $params{name};
     $self->{arguments} = $params{arguments};
     $self->{captures}  = $params{captures};
+    $self->{parent}    = undef;
 
     return $self;
 }
@@ -35,6 +36,12 @@ sub name {
     my $self = shift;
 
     return $self->{name};
+}
+
+sub parent {
+    my $self = shift;
+
+    return $self->{parent};
 }
 
 1;
