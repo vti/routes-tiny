@@ -122,11 +122,6 @@ Routes::Tiny - Routes
     # Globbing (matches 'photos/foo/bar/baz')
     $routes->add_route('/photos/*other');
 
-    # Subroutes
-    my $subroutes = Routes::Tiny->new;
-    $subroutes->add_route('/article/:id');
-    $routes->include('/admin/', $subroutes);
-
     # Path building
     $routes->add_route('/:foo/:bar', name => 'default');
     $routes->build_path('default', foo => 'hello', bar => 'world');
@@ -137,6 +132,11 @@ Routes::Tiny - Routes
 
     # Matching with method
     my $match = $routes->match('/hello/world', method => 'GET');
+
+    # Subroutes
+    my $subroutes = Routes::Tiny->new;
+    $subroutes->add_route('/article/:id');
+    $routes->include('/admin/', $subroutes);
 
 =head1 DESCRIPTION
 
@@ -192,16 +192,6 @@ slashes.
 
 It is possible to specify a globbing placeholder.
 
-=head2 C<Subroutes>
-
-    $subroutes = Routes::Tiny->new;
-    $subroutes->add_route('/related/:page');
-    $routes->include('/article/:id/', $subroutes);
-
-    $match = $routes->match('/article/1/related/3/');
-    # $match->captures is {page => 3}
-    # TODO: continue from here
-
 =head2 C<Passing arguments AS IS>
 
     $routes->add_route('/', arguments => {one => 'two'});
@@ -219,6 +209,32 @@ It is possible to pass arguments to the match object AS IS.
     # $path is '/articles/123'
 
 It is possible to reconstruct a path from route's name and parameters.
+
+=head2 C<Subroutes>
+
+    $subroutes = Routes::Tiny->new;
+    $subroutes->add_route('/articles/:id', name => 'admin-article');
+    $routes->include('/admin/', $subroutes);
+
+    $match = $routes->match('/admin/articles/3/');
+    # $match->captures is {id => 3}
+
+It is possible to capture params in include routes
+
+    $subroutes = Routes::Tiny->new;
+    $subroutes->add_route('/comments/:page/', name => 'comments');
+    $routes->include('/:type/:id/', $subroutes);
+
+    $match = $routes->match('/articles/3/comments/5/');
+    # $match->captures is {page => 5}
+    # $match->parent->captures is {type => 'articles', id => 3}
+
+Parent routes includes names of children routes, so it's possible to buil path
+
+    $path = $routes->build_path('admin-article', id => 123);
+    # $path is '/admin/articles/123'
+    $path = $routes->build_path('comments', type => 'articles', id => 123, page => 5);
+    # $path is '/articles/123/comments/5/'
 
 =head1 WARNINGS
 
@@ -247,6 +263,12 @@ If you don't want this behaviour pass C<strict_trailing_slash> to the constructo
     $routes->add_route('/:service/:action');
 
 Add a new route.
+
+=head2 C<include>
+
+    $routes->include('/admin/', $subroutes)
+
+Includes one Routes::Tiny instance into another with given prefix.
 
 =head2 C<match>
 
