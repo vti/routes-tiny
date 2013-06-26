@@ -13,6 +13,7 @@ sub new {
     $self->{name}      = $params{name};
     $self->{arguments} = $params{arguments};
     $self->{captures}  = $params{captures};
+    $self->{parent}    = undef;
 
     return $self;
 }
@@ -37,6 +38,12 @@ sub name {
     return $self->{name};
 }
 
+sub parent {
+    my $self = shift;
+
+    return $self->{parent};
+}
+
 1;
 __END__
 
@@ -50,6 +57,7 @@ Routes::Tiny::Match - Matched object
 
     my $name = $match->name;
     my $params_hashref = $match->params;
+    my $parent_match = $match->parent
 
 =head1 DESCRIPTION
 
@@ -78,6 +86,10 @@ Get params.
 =head2 C<params>
 
 An alias to C<captures.
+
+=head2 C<parent>
+
+Reference to parent match in case of matching subroutes.
 
 =head1 METHODS
 
