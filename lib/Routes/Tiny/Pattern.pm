@@ -166,7 +166,7 @@ sub build_path {
 
     my $head = q{/};
 
-    my $parent_pattern = $self->{routes}->{parent_pattern};
+    my $parent_pattern = $self->{routes} && $self->{routes}->{parent_pattern};
     if ($parent_pattern) {
         $head = $parent_pattern->build_path(%params);
         $head .= q{/} unless substr($head, -1) eq q{/};

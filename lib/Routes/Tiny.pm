@@ -45,14 +45,14 @@ sub add_route {
     return $pattern;
 }
 
-sub include {
+sub mount {
     my $self = shift;
     my ($pattern, $routes, @args) = @_;
 
     $pattern = $self->add_route($pattern, subroutes => $routes, @args);
     $routes->{parent_pattern} = $pattern;
-    Scalar::Util::weaken($routes->{parent_pattern});
     $self->_register_pattern_name($_) for values %{ $routes->{names} };
+    Scalar::Util::weaken($routes->{parent_pattern});
     return $pattern;
 }
 
@@ -90,6 +90,10 @@ sub _register_pattern_name {
     }
     else {
         $self->{names}->{ $name } = $pattern;
+        my $parent_routes = $self->{parent_pattern} && $self->{parent_pattern}->{routes};
+        if ($parent_routes) {
+            $parent_routes->_register_pattern_name(@_);
+        }
     }
 }
 
@@ -136,7 +140,7 @@ Routes::Tiny - Routes
     # Subroutes
     my $subroutes = Routes::Tiny->new;
     $subroutes->add_route('/article/:id');
-    $routes->include('/admin/', $subroutes);
+    $routes->mount('/admin/', $subroutes);
 
 =head1 DESCRIPTION
 
@@ -214,22 +218,22 @@ It is possible to reconstruct a path from route's name and parameters.
 
     $subroutes = Routes::Tiny->new;
     $subroutes->add_route('/articles/:id', name => 'admin-article');
-    $routes->include('/admin/', $subroutes);
+    $routes->mount('/admin/', $subroutes);
 
     $match = $routes->match('/admin/articles/3/');
     # $match->captures is {id => 3}
 
-It is possible to capture params in include routes
+It is possible to capture params in mount routes
 
     $subroutes = Routes::Tiny->new;
     $subroutes->add_route('/comments/:page/', name => 'comments');
-    $routes->include('/:type/:id/', $subroutes);
+    $routes->mount('/:type/:id/', $subroutes);
 
     $match = $routes->match('/articles/3/comments/5/');
     # $match->captures is {page => 5}
     # $match->parent->captures is {type => 'articles', id => 3}
 
-Parent routes includes names of children routes, so it's possible to buil path
+Parent routes mounts names of children routes, so it's possible to buil path
 
     $path = $routes->build_path('admin-article', id => 123);
     # $path is '/admin/articles/123'
@@ -264,9 +268,9 @@ If you don't want this behaviour pass C<strict_trailing_slash> to the constructo
 
 Add a new route.
 
-=head2 C<include>
+=head2 C<mount>
 
-    $routes->include('/admin/', $subroutes)
+    $routes->mount('/admin/', $subroutes)
 
 Includes one Routes::Tiny instance into another with given prefix.
 

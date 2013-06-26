@@ -13,17 +13,18 @@ my $r2 = Routes::Tiny->new;
 $r2->add_route('/', name => 'r2_root');
 $r2->add_route('/bar/:id/', name => 'r2_bar');
 $r2->add_route('/bar/*path/', name => 'r2_path');
-ok($r2->include('/r1/', $r1));
+ok($r2->mount('/r1/', $r1));
 
 my $r3 = Routes::Tiny->new;
 $r3->add_route('/bar/:id/', name => 'r3_bar');
 
 my $ro = Routes::Tiny->new;
-ok($ro->include('/r2/', $r2));
-ok($ro->include('/r3/:parent_id/', $r3, name => 'r3_inc'));
+ok($ro->mount('/r2/', $r2));
+ok($ro->mount('/r3/:parent_id/', $r3, name => 'r3_inc'));
 $ro->add_route('/r2/*path/', name => 'parent_foo_path');
 $ro->add_route('/*path', name => 'fallback');
 
+$r2->add_route('/late_route/', name => 'late-route');
 
 my $m1 = $ro->match('/r2/');
 ok($m1 && $m1->{name} eq 'r2_root');
@@ -56,3 +57,6 @@ is($p1, '/r2/bar/3/');
 
 my $p2 = $ro->build_path('r3_bar', parent_id => 1, id => 2);
 is($p2, '/r3/1/bar/2/');
+
+my $p3 = $ro->build_path('late-route');
+is($p3, '/r2/late_route/');
