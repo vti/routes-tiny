@@ -4,9 +4,10 @@ use strict;
 use warnings;
 
 require Carp;
+require Scalar::Util;
 use Routes::Tiny::Pattern;
 
-our $VERSION = 0.1;
+our $VERSION = 0.11;
 
 sub new {
     my $class = shift;
@@ -17,7 +18,9 @@ sub new {
 
     $self->{strict_trailing_slash} = $params{strict_trailing_slash};
 
+    $self->{parent_pattern}        = undef;
     $self->{patterns}              = [];
+    $self->{names}                 = {};
     $self->{strict_trailing_slash} = 1
       unless defined $self->{strict_trailing_slash};
 
@@ -30,12 +33,26 @@ sub add_route {
 
     $pattern = $self->_build_pattern(
         strict_trailing_slash => $self->{strict_trailing_slash},
+        routes                => $self,
         pattern               => $pattern,
         @args
     );
 
     push @{$self->{patterns}}, $pattern;
 
+    $self->_register_pattern_name($pattern) if $pattern->{name};
+
+    return $pattern;
+}
+
+sub mount {
+    my $self = shift;
+    my ($pattern, $routes, @args) = @_;
+
+    $pattern = $self->add_route($pattern, subroutes => $routes, @args);
+    $routes->{parent_pattern} = $pattern;
+    $self->_register_pattern_name($_) for values %{ $routes->{names} };
+    Scalar::Util::weaken($routes->{parent_pattern});
     return $pattern;
 }
 
@@ -56,22 +73,28 @@ sub build_path {
     my $self = shift;
     my ($name, @args) = @_;
 
-    my $pattern = $self->_find_route($name);
+    my $pattern = $self->{names}->{$name};
 
     return $pattern->build_path(@args) if $pattern;
 
     Carp::croak("Unknown name '$name' used to build a path");
 }
 
-sub _find_route {
+sub _register_pattern_name {
     my $self = shift;
-    my ($name) = @_;
+    my ($pattern) = @_;
 
-    foreach my $pattern (@{$self->{patterns}}) {
-        return $pattern if $pattern->name && $pattern->name eq $name;
+    my $name = $pattern->name;
+    if (exists $self->{names}->{ $name }) {
+        Carp::carp("pattern name '$name' already used");
     }
-
-    return;
+    else {
+        $self->{names}->{ $name } = $pattern;
+        my $parent_routes = $self->{parent_pattern} && $self->{parent_pattern}->{routes};
+        if ($parent_routes) {
+            $parent_routes->_register_pattern_name(@_);
+        }
+    }
 }
 
 sub _build_pattern { shift; return Routes::Tiny::Pattern->new(@_) }
@@ -113,6 +136,11 @@ Routes::Tiny - Routes
 
     # Matching with method
     my $match = $routes->match('/hello/world', method => 'GET');
+
+    # Subroutes
+    my $subroutes = Routes::Tiny->new;
+    $subroutes->add_route('/article/:id');
+    $routes->mount('/admin/', $subroutes);
 
 =head1 DESCRIPTION
 
@@ -186,6 +214,32 @@ It is possible to pass arguments to the match object AS IS.
 
 It is possible to reconstruct a path from route's name and parameters.
 
+=head2 C<Subroutes>
+
+    $subroutes = Routes::Tiny->new;
+    $subroutes->add_route('/articles/:id', name => 'admin-article');
+    $routes->mount('/admin/', $subroutes);
+
+    $match = $routes->match('/admin/articles/3/');
+    # $match->captures is {id => 3}
+
+It is possible to capture params in mount routes
+
+    $subroutes = Routes::Tiny->new;
+    $subroutes->add_route('/comments/:page/', name => 'comments');
+    $routes->mount('/:type/:id/', $subroutes);
+
+    $match = $routes->match('/articles/3/comments/5/');
+    # $match->captures is {page => 5}
+    # $match->parent->captures is {type => 'articles', id => 3}
+
+Parent routes mounts names of children routes, so it's possible to buil path
+
+    $path = $routes->build_path('admin-article', id => 123);
+    # $path is '/admin/articles/123'
+    $path = $routes->build_path('comments', type => 'articles', id => 123, page => 5);
+    # $path is '/articles/123/comments/5/'
+
 =head1 WARNINGS
 
 =head2 C<Trailing slash issue>
@@ -213,6 +267,12 @@ If you don't want this behaviour pass C<strict_trailing_slash> to the constructo
     $routes->add_route('/:service/:action');
 
 Add a new route.
+
+=head2 C<mount>
+
+    $routes->mount('/admin/', $subroutes)
+
+Includes one Routes::Tiny instance into another with given prefix.
 
 =head2 C<match>
 
