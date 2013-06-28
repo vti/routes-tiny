@@ -85,7 +85,7 @@ Get params.
 
 =head2 C<params>
 
-An alias to C<captures.
+An alias to C<captures>.
 
 =head2 C<parent>
 
