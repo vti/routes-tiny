@@ -298,6 +298,8 @@ Sergey Zasenko (und3f)
 
 Roman Galeev (jamhed)
 
+Dmitry Smal (mialinx)
+
 =head1 AUTHOR
 
 Viacheslav Tykhanovskyi, C<vti@cpan.org>.
