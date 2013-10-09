@@ -81,7 +81,7 @@ sub match {
     if ($self->{subroutes}) {
         my $parent = $match;
         my $tail = substr($path, length $&);
-        $match = $self->{subroutes}->match($tail); 
+        $match = $self->{subroutes}->match($tail, %args);
         $match->{parent} = $parent if $match;
     }
 
