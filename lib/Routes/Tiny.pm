@@ -7,7 +7,7 @@ require Carp;
 require Scalar::Util;
 use Routes::Tiny::Pattern;
 
-our $VERSION = 0.11;
+our $VERSION = 0.12;
 
 sub new {
     my $class = shift;

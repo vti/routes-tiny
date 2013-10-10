@@ -2,6 +2,8 @@ Revision history for perl module Routes::Tiny
 
 {{$NEXT}}
 
+0.12 2013-10-10T17:27:16Z
+
  - Pass params when matching to subroutes too (ziontab)
 
 0.11 2013-06-28T06:56:10Z
