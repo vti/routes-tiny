@@ -300,6 +300,8 @@ Roman Galeev (jamhed)
 
 Dmitry Smal (mialinx)
 
+Dinar (ziontab)
+
 =head1 AUTHOR
 
 Viacheslav Tykhanovskyi, C<vti@cpan.org>.
