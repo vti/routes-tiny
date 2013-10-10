@@ -1,17 +1,17 @@
 use strict;
 use warnings;
 
-use Test::More 'no_plan';
+use Test::More;
 
 use Routes::Tiny;
 
 my $r1 = Routes::Tiny->new;
-$r1->add_route('/', name => 'r1_root');
+$r1->add_route('/',         name => 'r1_root');
 $r1->add_route('/bla/:id/', name => 'r1_id');
 
 my $r2 = Routes::Tiny->new;
-$r2->add_route('/', name => 'r2_root');
-$r2->add_route('/bar/:id/', name => 'r2_bar');
+$r2->add_route('/',           name => 'r2_root');
+$r2->add_route('/bar/:id/',   name => 'r2_bar');
 $r2->add_route('/bar/*path/', name => 'r2_path');
 ok($r2->mount('/r1/', $r1));
 
@@ -22,7 +22,7 @@ my $ro = Routes::Tiny->new;
 ok($ro->mount('/r2/', $r2));
 ok($ro->mount('/r3/:parent_id/', $r3, name => 'r3_inc'));
 $ro->add_route('/r2/*path/', name => 'parent_foo_path');
-$ro->add_route('/*path', name => 'fallback');
+$ro->add_route('/*path',     name => 'fallback');
 
 $r2->add_route('/late_route/', name => 'late-route');
 
@@ -46,7 +46,7 @@ ok($m5 && $m5->{name} eq 'r1_id');
 my $m6 = $ro->match('/r3/5/bar/7/');
 ok($m6 && $m6->{name} eq 'r3_bar');
 is($m6->{captures}->{id}, 7);
-ok($m6->{parent} && $m6->{parent}->{name} eq 'r3_inc'); 
+ok($m6->{parent} && $m6->{parent}->{name} eq 'r3_inc');
 is($m6->{parent}->{captures}->{parent_id}, 5);
 
 my $m7 = $ro->match('/r3/5/baz/7/');
@@ -60,3 +60,16 @@ is($p2, '/r3/1/bar/2/');
 
 my $p3 = $ro->build_path('late-route');
 is($p3, '/r2/late_route/');
+
+subtest 'pass params to subroutes' => sub {
+    my $r1 = Routes::Tiny->new;
+    $r1->add_route('/foo', method => 'POST');
+
+    my $ro = Routes::Tiny->new;
+    $ro->mount('/subroute/', $r1);
+
+    ok !$ro->match('/subroute/foo', method => 'GET');
+    ok $ro->match('/subroute/foo', method => 'POST');
+};
+
+done_testing;
