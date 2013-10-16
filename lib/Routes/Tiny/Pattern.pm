@@ -201,7 +201,7 @@ sub _prepare_pattern {
     return $self->{pattern} if ref $self->{pattern} eq 'Regexp';
 
     my $pattern = $self->{pattern};
-    if ($pattern !~ m{ \A / }xms) {
+    if ($pattern !~ m{ \A ( / | \(/.+?\)\?/ ) }xms) {
         $pattern = q{/} . $pattern;
     }
 

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 18;
+use Test::More tests => 20;
 
 use Routes::Tiny;
 
@@ -65,3 +65,12 @@ $m = $r->match('2009/month08/2');
 is_deeply($m->params, {year => 2009, month => '08', day => 2});
 is($r->build_path('route', year => 2009, month => '08', day => 2),
     '/2009/month08/2');
+
+$r = Routes::Tiny->new;
+$r->add_route('(/:year)?/:month/:day', name => 'route');
+
+$m = $r->match('/2009/12/2');
+is_deeply($m->params, {year => 2009, month => 12, day => 2});
+
+$m = $r->match('/12/2');
+is_deeply($m->params, {year => undef, month => 12, day => 2});
