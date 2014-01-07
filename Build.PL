@@ -23,7 +23,7 @@ my %args = (
         'Module::Build' => 0.38,
     },
 
-    name            => 'routes-tiny',
+    name            => 'Routes-Tiny',
     module_name     => 'Routes::Tiny',
     allow_pureperl => 0,
 
