@@ -19,7 +19,7 @@ sub {
         return [200, [], ['Hello from ' . $action]];
     }
 
-    return [200, [], ['Not Found']];
+    return [404, [], ['Not Found']];
 };
 
 sub build_routes {
