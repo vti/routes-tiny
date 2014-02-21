@@ -160,6 +160,14 @@ L<Routes::Tiny> aims to be easy to use in any web framework.
 It is possible to specify a constraint that a placeholder must match using a
 normal Perl regular expression.
 
+Constraints can be passed as array references:
+
+    $routes->add_route('/articles/:action',
+        constraints => {action => [qw/add update/]});
+
+    $match = $routes->match('/articles/add');    # Routes::Tiny::Match object
+    $match = $routes->match('/articles/delete'); # undef
+
 =head2 C<Optional placeholders>
 
     $routes->add_route('/admin/:service(/:action)?', defaults => {action => 'list'});
