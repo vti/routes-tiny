@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More;
 
 use Routes::Tiny;
 
@@ -25,3 +25,18 @@ ok($@ =~ qr/Required param 'id' was not passed when building a path/);
 
 eval { $r->build_path('article', id => 'abc'); };
 ok($@ =~ qr/Param 'id' fails a constraint/);
+
+subtest 'contraint as array' => sub {
+    my $r = Routes::Tiny->new;
+
+    $r->add_route(
+        '/articles/:id',
+        name        => 'article',
+        constraints => {id => [qw/1 2 3/]}
+    );
+
+    ok $r->match('/articles/1');
+    ok!$r->match('/articles/a');
+};
+
+done_testing;
