@@ -94,10 +94,14 @@ sub match {
 sub _validate_type {
     my($self, $name, $param) = @_;
 
+    # Valid if there are no constraints, or if it matches ANY of the constraints.
     if (defined(my $type_constraints = $self->{type_constraints}->{$name})) {
-        return 0 if grep {
-            not $_->check($param)
-        } @$type_constraints;
+        if(@$type_constraints > 0) {
+            return 1 if grep {
+                $_->check($param)
+            } @$type_constraints;
+            return 0;
+        }
     }
     return 1;
 }
@@ -251,32 +255,19 @@ sub _prepare_pattern {
 
             if (exists $self->{constraints}->{$name}) {
                 my $constraint = $self->{constraints}->{$name};
-                my $constraints = ref $constraint eq 'ARRAY' ? $constraint : [$constraint];
 
-                # prep regex constraints
-                {
-                    my @re_constraints = grep {! _is_type($_) } @$constraints;
-                    if (@re_constraints > 1) {
-                        $re_constraint = '?:' . join('|', @re_constraints);
-                    }
-                    elsif(@re_constraints) {
-                        $re_constraint = $re_constraints[0];
-                    }
-
-                    $re .= "($re_constraint)"
-                      if defined($re_constraint);
+                if(ref $constraint eq 'ARRAY') {
+                    $re_constraint = '?:' . join('|', @$constraint);
+                }
+                elsif(_is_type($constraint)) {
+                    $self->{type_constraints}->{$name} = [$constraint];
+                }
+                else {
+                    $re_constraint = $constraint;
                 }
 
-                # prep type constraints
-                {
-                    my @type_constraints = grep {
-                        Scalar::Util::blessed($_)
-                        && $_->isa('Moose::Meta::TypeConstraint')
-                    } @$constraints;
-                    if(@type_constraints) {
-                        $self->{type_constraints}->{$name} = \@type_constraints;
-                    }
-                }
+                $re .= "($re_constraint)"
+                  if defined($re_constraint);
             }
 
             $re .= '([^\/]+)'
