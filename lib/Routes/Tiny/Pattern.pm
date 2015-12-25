@@ -94,6 +94,8 @@ sub match {
 sub _validate_type {
     my($self, $name, $param) = @_;
 
+    return 1 if not defined $param;
+
     # Valid if there are no constraints, or if it matches ANY of the constraints.
     if (defined(my $type_constraints = $self->{type_constraints}->{$name})) {
         if(@$type_constraints > 0) {

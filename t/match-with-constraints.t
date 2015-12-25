@@ -46,13 +46,17 @@ subtest 'moose type constraints' => sub {
     my $r = Routes::Tiny->new;
 
     $r->add_route(
-        '/articles/:id',
+        '/articles/:id(/:page)?',
         name        => 'article',
-        constraints => {id => Int}
+        constraints => {id => Int, page => Int}
     );
 
     ok $r->match('/articles/1');
     ok!$r->match('/articles/a');
+
+    ok $r->match('/articles/1/2');
+    ok!$r->match('/articles/1/a');
+
 };
 
 done_testing;
