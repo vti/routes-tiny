@@ -32,6 +32,31 @@ sub captures {
     return $self->{captures};
 }
 
+sub cascading_captures {
+    my $self = shift;
+
+    my $captures = { %{$self->captures} };
+
+    if($self->parent) {
+        my $parent_captures = $self->parent->captures;
+
+        for my $key (keys %$parent_captures) {
+            if(exists $captures->{$key}) {
+                my $parent_capture = $parent_captures->{$key};
+                $captures->{$key} = [
+                    (ref $parent_capture eq 'ARRAY' ? @$parent_capture : $parent_capture),
+                    $captures->{$key}
+                ];
+            }
+        }
+    }
+
+    return $self->parent ? {
+        %{$self->parent->cascading_captures},
+        %$captures
+    } : $captures;
+}
+
 sub name {
     my $self = shift;
 
@@ -82,6 +107,10 @@ Get route's pattern arguments.
     my $hashref = $match->captures;
 
 Get params.
+
+=head2 cascading_captures
+
+Get params as well as parent and ancestor params in one hash.
 
 =head2 C<params>
 

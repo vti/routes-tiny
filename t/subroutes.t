@@ -88,6 +88,11 @@ subtest 'sub-subroutes' => sub {
       ok($grandparent);
       is($grandparent->captures->{topic}, 'rainbows');
     }
+
+    my $cascading_captures = $match->cascading_captures;
+    is($cascading_captures->{id}, 7);
+    is($cascading_captures->{parent_id}, 5);
+    is($cascading_captures->{topic}, 'rainbows');
   }
 };
 
