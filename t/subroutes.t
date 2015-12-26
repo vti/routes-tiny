@@ -74,9 +74,9 @@ subtest 'pass params to subroutes' => sub {
 
 subtest 'sub-subroutes' => sub {
   my $r0 = Routes::Tiny->new;
-  $r0->mount('/toplevel/:topic', $ro);
+  $r0->mount('/toplevel/:id', $ro);
 
-  my $match = $r0->match('/toplevel/rainbows/r3/5/bar/7/');
+  my $match = $r0->match('/toplevel/22/r3/5/bar/7/');
 
   ok($match);
   if($match) {
@@ -86,13 +86,12 @@ subtest 'sub-subroutes' => sub {
     if($parent) {
       my $grandparent = $parent->parent;
       ok($grandparent);
-      is($grandparent->captures->{topic}, 'rainbows');
+      is($grandparent->captures->{id}, 22);
     }
 
     my $cascading_captures = $match->cascading_captures;
-    is($cascading_captures->{id}, 7);
+    is($cascading_captures->{id}, 7); # Id overrides grandparent id
     is($cascading_captures->{parent_id}, 5);
-    is($cascading_captures->{topic}, 'rainbows');
   }
 };
 

@@ -41,13 +41,7 @@ sub cascading_captures {
         my $parent_captures = $self->parent->captures;
 
         for my $key (keys %$parent_captures) {
-            if(exists $captures->{$key}) {
-                my $parent_capture = $parent_captures->{$key};
-                $captures->{$key} = [
-                    (ref $parent_capture eq 'ARRAY' ? @$parent_capture : $parent_capture),
-                    $captures->{$key}
-                ];
-            }
+            $captures->{$key} //= $parent_captures->{$key};
         }
     }
 
