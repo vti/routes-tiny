@@ -72,4 +72,24 @@ subtest 'pass params to subroutes' => sub {
     ok $ro->match('/subroute/foo', method => 'POST');
 };
 
+subtest 'sub-subroutes' => sub {
+  my $r0 = Routes::Tiny->new;
+  $r0->mount('/toplevel/:topic', $ro);
+
+  my $match = $r0->match('/toplevel/rainbows/r3/5/bar/7/');
+
+  ok($match);
+  if($match) {
+    my $parent = $match->parent;
+    ok($parent);
+    is($parent->captures->{parent_id}, 5);
+    if($parent) {
+      my $grandparent = $parent->parent;
+      ok($grandparent);
+      is($grandparent->captures->{topic}, 'rainbows');
+    }
+  }
+};
+
+
 done_testing;

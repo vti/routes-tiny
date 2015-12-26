@@ -75,14 +75,14 @@ sub match {
     my $match = $self->_build_match(
         name      => $self->name,
         arguments => $self->arguments,
-        captures  => $captures
+        captures  => $captures,
+        parent    => $args{parent}
     );
 
     if ($self->{subroutes}) {
         my $parent = $match;
         my $tail = substr($path, length $&);
-        $match = $self->{subroutes}->match($tail, %args);
-        $match->{parent} = $parent if $match;
+        $match = $self->{subroutes}->match($tail, %args, parent => $parent);
     }
 
     return $match;
