@@ -13,7 +13,7 @@ sub new {
     $self->{name}      = $params{name};
     $self->{arguments} = $params{arguments};
     $self->{captures}  = $params{captures};
-    $self->{parent}    = undef;
+    $self->{parent}    = $params{parent};
 
     return $self;
 }
