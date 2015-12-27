@@ -35,15 +35,7 @@ sub captures {
 sub cascading_captures {
     my $self = shift;
 
-    my $captures = { %{$self->captures} };
-
-    if($self->parent) {
-        my $parent_captures = $self->parent->captures;
-
-        for my $key (keys %$parent_captures) {
-            $captures->{$key} //= $parent_captures->{$key};
-        }
-    }
+    my $captures = $self->captures;
 
     return $self->parent ? {
         %{$self->parent->cascading_captures},
