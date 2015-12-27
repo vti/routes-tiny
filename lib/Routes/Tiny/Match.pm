@@ -13,7 +13,7 @@ sub new {
     $self->{name}      = $params{name};
     $self->{arguments} = $params{arguments};
     $self->{captures}  = $params{captures};
-    $self->{parent}    = undef;
+    $self->{parent}    = $params{parent};
 
     return $self;
 }
@@ -30,6 +30,17 @@ sub captures {
     my $self = shift;
 
     return $self->{captures};
+}
+
+sub cascading_captures {
+    my $self = shift;
+
+    my $captures = $self->captures;
+
+    return $self->parent ? {
+        %{$self->parent->cascading_captures},
+        %$captures
+    } : $captures;
 }
 
 sub name {
@@ -82,6 +93,10 @@ Get route's pattern arguments.
     my $hashref = $match->captures;
 
 Get params.
+
+=head2 cascading_captures
+
+Get params as well as parent and ancestor params in one hash.
 
 =head2 C<params>
 
