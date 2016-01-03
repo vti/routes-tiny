@@ -105,7 +105,7 @@ subtest 'cascading captures' => sub {
 
     my $match = $top->match('/top/rainbows/second/5/last/7/');
 
-    is_deeply $match->cascading_captures,
+    is_deeply $match->captures,
       {
         topic     => 'rainbows',
         parent_id => 5,
