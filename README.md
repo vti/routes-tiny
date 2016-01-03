@@ -206,6 +206,8 @@ Dmitry Smal (mialinx)
 
 Dinar (ziontab)
 
+Jonathan R. Warden
+
 # AUTHOR
 
 Viacheslav Tykhanovskyi, `vti@cpan.org`.
