@@ -35,6 +35,7 @@ sub new {
     }
 
     $self->{captures} = [];
+    $self->{type_constraints} = {};
 
     $self->_prepare_pattern;
 
@@ -67,6 +68,8 @@ sub match {
 
         my $value = shift @captures;
 
+        return unless $self->_validate_type($capture, $value);
+
         if (defined($value) || !exists $captures->{$capture}) {
             $captures->{$capture} = $value;
         }
@@ -86,6 +89,28 @@ sub match {
     }
 
     return $match;
+}
+
+sub _validate_type {
+    my($self, $name, $param) = @_;
+
+    return 1 if not defined $param;
+
+    # Valid if there are no constraints, or if it matches ANY of the constraints.
+    if (defined(my $type_constraints = $self->{type_constraints}->{$name})) {
+        if(@$type_constraints > 0) {
+            return 1 if grep {
+                $_->check($param)
+            } @$type_constraints;
+            return 0;
+        }
+    }
+    return 1;
+}
+
+sub _is_type {
+    my($value) = @_;
+    return 1 if Scalar::Util::blessed($value) && $value->isa('Moose::Meta::TypeConstraint')
 }
 
 sub build_path {
@@ -130,6 +155,9 @@ sub build_path {
                     Carp::croak("Param '$name' fails a constraint")
                       unless $param =~ m/^ $constraint $/xms;
                 }
+
+                Carp::croak("Param '$name' doesn't match type")
+                    unless $self->_validate_type($name, $param);
 
                 $path .= $param;
             }
@@ -225,23 +253,32 @@ sub _prepare_pattern {
         }
         elsif ($pattern =~ m{ \G :($TOKEN) }gcxms) {
             my $name = $1;
-            my $constraint;
+            my $re_constraint;
 
             if (exists $self->{constraints}->{$name}) {
-                $constraint = $self->{constraints}->{$name};
-                if (ref $constraint eq 'ARRAY') {
-                    $constraint = '?:' . join('|', @$constraint);
+                my $constraint = $self->{constraints}->{$name};
+
+                if(ref $constraint eq 'ARRAY') {
+                    $re_constraint = '?:' . join('|', @$constraint);
                 }
-                $re .= "($constraint)";
+                elsif(_is_type($constraint)) {
+                    $self->{type_constraints}->{$name} = [$constraint];
+                }
+                else {
+                    $re_constraint = $constraint;
+                }
+
+                $re .= "($re_constraint)"
+                  if defined($re_constraint);
             }
-            else {
-                $re .= '([^\/]+)';
-            }
+
+            $re .= '([^\/]+)'
+                unless $re_constraint;
 
             push @$part,
               { type       => 'capture',
                 name       => $name,
-                constraint => $constraint ? qr/^ $constraint $/xms : undef,
+                constraint => $re_constraint ? qr/^ $re_constraint $/xms : undef,
                 level      => $par_depth
               };
 
