@@ -93,4 +93,24 @@ subtest 'saves captures' => sub {
     is($last_match->captures->{topic}, 'rainbows');
 };
 
+subtest 'cascading captures' => sub {
+    my $last = Routes::Tiny->new;
+    $last->add_route('/last/:id/');
+
+    my $second = Routes::Tiny->new;
+    $second->mount('/second/:parent_id/', $last);
+
+    my $top = Routes::Tiny->new;
+    $top->mount('/top/:topic', $second);
+
+    my $match = $top->match('/top/rainbows/second/5/last/7/');
+
+    is_deeply $match->cascading_captures,
+      {
+        topic     => 'rainbows',
+        parent_id => 5,
+        id        => 7
+      };
+};
+
 done_testing;
