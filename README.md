@@ -40,9 +40,9 @@ Routes::Tiny - Routes
 
 # DESCRIPTION
 
-[Routes::Tiny](http://search.cpan.org/perldoc?Routes::Tiny) is a lightweight routes implementation.
+[Routes::Tiny](https://metacpan.org/pod/Routes::Tiny) is a lightweight routes implementation.
 
-[Routes::Tiny](http://search.cpan.org/perldoc?Routes::Tiny) aims to be easy to use in any web framework.
+[Routes::Tiny](https://metacpan.org/pod/Routes::Tiny) aims to be easy to use in any web framework.
 
 # FEATURES
 
@@ -55,6 +55,14 @@ Routes::Tiny - Routes
 
 It is possible to specify a constraint that a placeholder must match using a
 normal Perl regular expression.
+
+Constraints can be passed as array references:
+
+    $routes->add_route('/articles/:action',
+        constraints => {action => [qw/add update/]});
+
+    $match = $routes->match('/articles/add');    # Routes::Tiny::Match object
+    $match = $routes->match('/articles/delete'); # undef
 
 ## `Optional placeholders`
 

@@ -2,6 +2,10 @@ Revision history for perl module Routes::Tiny
 
 {{$NEXT}}
 
+ - captures now return all captures from all children (Jonathan R. Warden)
+ - fix bug: correct parent of match on sub-subroute (Jonathan R. Warden)
+ - PSGI example
+
 0.14 2014-01-07T08:09:27Z
 
  - Just meta files update
