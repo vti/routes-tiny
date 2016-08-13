@@ -54,7 +54,8 @@ subtest 'contraint as array' => sub {
         constraints => {id => [qw/1 2 3/]}
     );
 
-    ok $r->match('/articles/1');
+    ok $r->match('/articles/2');
+    is_deeply($r->match('/articles/2')->params, {id => 2});
     ok !$r->match('/articles/a');
 
     eval { $r->build_path('article', id => 'abc'); };
