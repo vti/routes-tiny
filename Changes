@@ -2,6 +2,10 @@ Revision history for perl module Routes::Tiny
 
 {{$NEXT}}
 
+0.16 2016-08-19T08:10:24Z
+
+ - Fix captures when using array constraints (Alexander Batyrshin)
+
 0.15 2016-01-03T20:19:43Z
 
  - captures now return all captures from all children (Jonathan R. Warden)

@@ -208,13 +208,15 @@ Dinar (ziontab)
 
 Jonathan R. Warden
 
+Alexander Batyrshin
+
 # AUTHOR
 
 Viacheslav Tykhanovskyi, `vti@cpan.org`.
 
 # COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2013, Viacheslav Tykhanovskyi
+Copyright (C) 2011-2016, Viacheslav Tykhanovskyi
 
 This program is free software, you can redistribute it and/or modify it under
 the terms of the Artistic License version 2.0.
