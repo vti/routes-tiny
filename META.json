@@ -4,7 +4,7 @@
       "Viacheslav Tykhanovskyi, C<vti@cpan.org>."
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v2.3.0, CPAN::Meta::Converter version 2.150005",
+   "generated_by" : "Minilla/v2.5.0, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "artistic_2"
    ],
@@ -59,13 +59,15 @@
          "web" : "https://github.com/vti/routes-tiny"
       }
    },
-   "version" : "0.15",
+   "version" : "0.16",
    "x_contributors" : [
       "Sergey Zasenko <d3fin3@gmail.com>",
       "Dmitry Smal <mialinx@gmail.com>",
       "Dinar Sabitov <lolall@yandex.ru>",
       "Jonathan R. Warden <john.warden@gmail.com>",
-      "vti <viacheslav.t@gmail.com>"
+      "Alexander Batyrshin <0x62ash@gmail.com>",
+      "Viacheslav Tykhanovskyi <viacheslav.t@gmail.com>",
+      "vti <vti@clarive.com>"
    ],
-   "x_serialization_backend" : "JSON::PP version 2.27203"
+   "x_serialization_backend" : "JSON::PP version 2.27300"
 }
