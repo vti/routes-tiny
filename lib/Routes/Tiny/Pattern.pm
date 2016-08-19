@@ -230,7 +230,7 @@ sub _prepare_pattern {
             if (exists $self->{constraints}->{$name}) {
                 $constraint = $self->{constraints}->{$name};
                 if (ref $constraint eq 'ARRAY') {
-                    $constraint = '?:' . join('|', @$constraint);
+                    $constraint = join('|', @$constraint);
                 }
                 $re .= "($constraint)";
             }
