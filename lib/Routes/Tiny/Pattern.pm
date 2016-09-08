@@ -18,7 +18,7 @@ sub new {
     $self->{name}           = $params{name};
     $self->{defaults}       = $params{defaults};
     $self->{arguments}      = $params{arguments};
-    $self->{method}         = $params{method};
+    $self->{method}         = $params{method} || $params{default_method};
     $self->{pattern}        = $params{pattern};
     $self->{constraints}    = $params{constraints} || {};
     $self->{routes}         = $params{routes};
