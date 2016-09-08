@@ -17,6 +17,7 @@ sub new {
     bless $self, $class;
 
     $self->{strict_trailing_slash} = $params{strict_trailing_slash};
+    $self->{default_method} = $params{default_method};
 
     $self->{parent_pattern}        = undef;
     $self->{patterns}              = [];
@@ -33,6 +34,7 @@ sub add_route {
 
     $pattern = $self->_build_pattern(
         strict_trailing_slash => $self->{strict_trailing_slash},
+        default_method		  => $self->{default_method},
         routes                => $self,
         pattern               => $pattern,
         @args
