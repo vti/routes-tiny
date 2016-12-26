@@ -72,9 +72,14 @@ sub match {
         }
     }
 
+    my $arguments = {
+        %{ $args{arguments} || {} },
+        %{ $self->arguments || {} }
+    };
+
     my $match = $self->_build_match(
         name      => $self->name,
-        arguments => $self->arguments,
+        arguments => $arguments,
         captures  => $captures,
         parent    => $args{parent}
     );
@@ -82,7 +87,8 @@ sub match {
     if ($self->{subroutes}) {
         my $parent = $match;
         my $tail = substr($path, length $&);
-        $match = $self->{subroutes}->match($tail, %args, parent => $parent);
+        $match = $self->{subroutes}
+          ->match($tail, %args, parent => $parent, arguments => $arguments);
     }
 
     return $match;
