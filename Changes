@@ -2,6 +2,10 @@ Revision history for perl module Routes::Tiny
 
 {{$NEXT}}
 
+0.17 2016-12-26T18:28:28Z
+
+ - merge arguments in subroutes
+
 0.16 2016-08-19T08:10:24Z
 
  - Fix captures when using array constraints (Alexander Batyrshin)
