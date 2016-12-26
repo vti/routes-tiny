@@ -15,6 +15,11 @@ sub new {
     my $self = {};
     bless $self, $class;
 
+    if (my $arguments = delete $params{'+arguments'}) {
+        $self->{arguments_push} = 1;
+        $params{arguments} = $arguments;
+    }
+
     $self->{name}           = $params{name};
     $self->{defaults}       = $params{defaults};
     $self->{arguments}      = $params{arguments};
@@ -72,10 +77,28 @@ sub match {
         }
     }
 
-    my $arguments = {
-        %{ $args{arguments} || {} },
-        %{ $self->arguments || {} }
-    };
+    my $arguments;
+    if ($self->{arguments_push}) {
+        %$arguments = %{ $self->arguments };
+
+        foreach my $key (keys %{ $args{arguments} || {} }) {
+            my $value = $args{arguments}->{$key};
+
+            if (exists $arguments->{$key}) {
+                $arguments->{$key} = [$arguments->{$key}] unless ref $arguments->{$key} eq 'ARRAY';
+                unshift @{ $arguments->{$key} }, ref $value eq 'ARRAY' ? @$value : $value;
+            }
+            else {
+                $arguments->{$key} = $value;
+            }
+        }
+    }
+    else {
+        $arguments = {
+            %{ $args{arguments} || {} },
+            %{ $self->arguments || {} }
+        };
+    }
 
     my $match = $self->_build_match(
         name      => $self->name,

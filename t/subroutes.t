@@ -134,4 +134,25 @@ subtest 'merges arguments' => sub {
       };
 };
 
+subtest 'merges arguments pushing' => sub {
+    my $last = Routes::Tiny->new;
+    $last->add_route('/last/:id/', '+arguments' => {foo => 'bar3', bar => 'baz'});
+
+    my $second = Routes::Tiny->new;
+    $second->mount('/second/:parent_id/', $last, '+arguments' => {second => 'argument', foo => 'bar2'});
+
+    my $top = Routes::Tiny->new;
+    $top->mount('/top/:topic', $second, arguments => {top => 'argument', foo => 'bar'});
+
+    my $match = $top->match('/top/rainbows/second/5/last/7/');
+
+    is_deeply $match->arguments,
+      {
+        top    => 'argument',
+        second => 'argument',
+        foo    => ['bar', 'bar2', 'bar3'],
+        bar    => 'baz',
+      };
+};
+
 done_testing;
