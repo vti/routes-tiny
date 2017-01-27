@@ -2,6 +2,10 @@ Revision history for perl module Routes::Tiny
 
 {{$NEXT}}
 
+0.19 2017-01-27T18:28:27Z
+
+ - default_method parameter (dshadow)
+
 0.18 2016-12-26T20:34:29Z
 
  - merge arguments in subroutes by pushing (+arguments)
