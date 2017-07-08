@@ -30,15 +30,8 @@ sub new {
 
 sub add_route {
     my $self = shift;
-    my ($pattern, @args) = @_;
 
-    $pattern = $self->_build_pattern(
-        strict_trailing_slash => $self->{strict_trailing_slash},
-        default_method		  => $self->{default_method},
-        routes                => $self,
-        pattern               => $pattern,
-        @args
-    );
+    my $pattern = $self->_build_pattern(@_);
 
     push @{$self->{patterns}}, $pattern;
 
@@ -99,7 +92,32 @@ sub _register_pattern_name {
     }
 }
 
-sub _build_pattern { shift; return Routes::Tiny::Pattern->new(@_) }
+sub _build_pattern {
+    my $self = shift;
+
+    if (@_ % 2) {
+        unshift(@_, 'pattern');
+    } else {
+        my $method  = shift;
+        my $pattern = shift;
+
+        if ($method =~ /^(GET|HEAD|POST|PUT|DELETE|TRACE|OPTIONS|CONNECT|PATCH)$/i) {
+            unshift(@_, pattern => $pattern);
+            unshift(@_, method  => $method);
+        } else {
+            Carp::croak("Unknown pattern http method '$_[0]'");
+        }
+    }
+
+    return Routes::Tiny::Pattern->new(
+        strict_trailing_slash => $self->{strict_trailing_slash},
+        default_method        => $self->{default_method},
+        routes                => $self,
+        @_
+    )
+}
+
+
 
 1;
 __END__
