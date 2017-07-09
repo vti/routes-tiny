@@ -247,6 +247,24 @@ It is possible to pass arguments to the match object AS IS.
     $match = $routes->match('/articles', method => 'PUT');
     # $m->captures is {action => 'create'}
 
+=head2 C<Matching with methods>
+
+    # Exact HTTP method definition
+    $routes->add_route('/articles', method => 'GET', defaults => {action => 'list'});
+
+    # Sweeter method definition
+    # METHOD => PATTERN should goes as first parameters to add_route()
+    $routes->add_route(PUT => '/articles', defaults => {action => 'create'});
+
+    $match = $routes->match('/articles', method => 'GET');
+    # $m->captures is {action => 'list'}
+
+    $match = $routes->match('/articles', method => 'PUT');
+    # $m->captures is {action => 'create'}
+
+
+It is possible to specify HTTP method for route
+
 =head2 C<Subroutes>
 
     $subroutes = Routes::Tiny->new;
