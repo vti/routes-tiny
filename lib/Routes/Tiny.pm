@@ -7,7 +7,7 @@ require Carp;
 require Scalar::Util;
 use Routes::Tiny::Pattern;
 
-our $VERSION = 0.20;
+our $VERSION = 0.21;
 
 sub new {
     my $class = shift;
@@ -17,6 +17,7 @@ sub new {
     bless $self, $class;
 
     $self->{strict_trailing_slash} = $params{strict_trailing_slash};
+    $self->{strict_case} = $params{strict_case};
     $self->{default_method} = $params{default_method};
 
     $self->{parent_pattern}        = undef;
@@ -24,6 +25,8 @@ sub new {
     $self->{names}                 = {};
     $self->{strict_trailing_slash} = 1
       unless defined $self->{strict_trailing_slash};
+    $self->{strict_case} = 0
+      unless defined $self->{strict_case};
 
     return $self;
 }
@@ -111,6 +114,7 @@ sub _build_pattern {
 
     return Routes::Tiny::Pattern->new(
         strict_trailing_slash => $self->{strict_trailing_slash},
+        strict_case           => $self->{strict_case},
         default_method        => $self->{default_method},
         routes                => $self,
         @_
@@ -297,6 +301,22 @@ Trailing slash is important.
 If you don't want this behaviour pass C<strict_trailing_slash> to the constructor:
 
     my $routes = Routes::Tiny->new(strict_trailing_slash => 0);
+
+=head2 C<Case sensitivity>
+
+Routes::Tiny is case insensitive by default.
+
+It means that
+
+    $routes->add_route('/admin/');
+
+will match with both C</admin/> and C</ADMIN/>.
+It may cause some security or SEO issues.
+If you don't want this behaviour pass C<strict_case> to the constructor:
+
+    my $routes = Routes::Tiny->new(strict_case => 1);
+
+
 
 =head1 METHODS
 

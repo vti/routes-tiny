@@ -2,6 +2,10 @@ Revision history for perl module Routes::Tiny
 
 {{$NEXT}}
 
+0.21 2017-07-10T16:10:02Z
+
+ - strict_case option added
+
 0.2 2017-07-09T20:05:02Z
 
  - method sugar for pattern building (Alexander Batyrshin)
