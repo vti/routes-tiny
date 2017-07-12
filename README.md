@@ -176,6 +176,20 @@ If you don't want this behaviour pass `strict_trailing_slash` to the constructor
 
     my $routes = Routes::Tiny->new(strict_trailing_slash => 0);
 
+## `Case sensitivity`
+
+Routes::Tiny is case sensitive by default (since 0.20).
+
+It means that
+
+    $routes->add_route('/admin/');
+
+will NOT match both `/admin/` and `/ADMIN/`.
+
+If you don't want this behaviour pass `strict_case` to the constructor:
+
+    my $routes = Routes::Tiny->new(strict_case => 0);
+
 # METHODS
 
 ## `new`
