@@ -28,6 +28,7 @@ sub new {
     $self->{constraints}    = $params{constraints} || {};
     $self->{routes}         = $params{routes};
     $self->{subroutes}      = $params{subroutes};
+    $self->{strict_placeholder_separator} = $params{strict_placeholder_separator};
     $self->{strict_trailing_slash} = $params{strict_trailing_slash};
     $self->{strict_case}    = $params{strict_case};
 
@@ -289,6 +290,9 @@ sub _prepare_pattern {
         }
         elsif ($pattern =~ m{ \G ($TOKEN) }gcxms) {
             my $text = $1;
+            if ( $self->{strict_placeholder_separator} && $text =~ m{ \A [;] }xms ) {
+                Carp::croak("Possible typo: route part starts with a semi-colon instead of a colon in `$text`");
+            }
             $re .= quotemeta $text;
 
             push @$part, {type => 'text', text => $text};

@@ -16,6 +16,7 @@ sub new {
     my $self = {};
     bless $self, $class;
 
+    $self->{strict_placeholder_separator} = $params{strict_placeholder_separator};
     $self->{strict_trailing_slash} = $params{strict_trailing_slash};
     $self->{strict_case} = $params{strict_case};
     $self->{default_method} = $params{default_method};
@@ -23,6 +24,10 @@ sub new {
     $self->{parent_pattern}        = undef;
     $self->{patterns}              = [];
     $self->{names}                 = {};
+
+    $self->{strict_placeholder_separator} = 1
+      unless defined $self->{strict_placeholder_separator};
+
     $self->{strict_trailing_slash} = 1
       unless defined $self->{strict_trailing_slash};
     $self->{strict_case} = 1
@@ -113,6 +118,7 @@ sub _build_pattern {
     }
 
     return Routes::Tiny::Pattern->new(
+        strict_placeholder_separator => $self->{strict_placeholder_separator},
         strict_trailing_slash => $self->{strict_trailing_slash},
         strict_case           => $self->{strict_case},
         default_method        => $self->{default_method},
